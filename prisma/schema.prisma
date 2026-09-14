@@ -1,7 +1,11 @@
-// untilfourever — product schema
+// untilfourever — data model
 //
 // Postgres (Neon). Local development points at a Neon dev branch, so there is
-// one provider and one set of migrations everywhere — no SQLite/Postgres drift.
+// one provider and one set of migrations everywhere.
+//
+// Authentication is Neon Auth, which owns its own `neon_auth` schema. We do not
+// model users here — the user id from the session is the only thing we store,
+// so there is no second copy of identity to drift out of sync.
 
 generator client {
   provider = "prisma-client-js"
@@ -13,8 +17,6 @@ datasource db {
   provider = "postgresql"
 }
 
-/// Real enums, enforced by the database. Under SQLite these had to be plain
-/// strings with the allowed values only documented in a comment.
 enum ProductStatus {
   draft
   live
@@ -40,16 +42,24 @@ enum Category {
   accessories
 }
 
+enum OrderStatus {
+  pending
+  paid
+  cancelled
+  refunded
+}
+
 model Product {
   id String @id @default(cuid())
 
   /// Instagram media id. Nullable and unique: null means hand-entered in
   /// /admin, non-null means imported. This is the dedupe key — an import can
   /// safely upsert on it without creating duplicates on re-sync.
-  ///
-  /// NULLs are not equal to each other in Postgres, so the unique index still
-  /// permits many hand-entered rows. That is the intent.
   igMediaId String? @unique
+
+  /// URL slug. Generated from brand + season + name, unique so /shop/<slug>
+  /// stays readable rather than exposing a cuid.
+  slug String @unique
 
   brand    String
   designer String?
@@ -65,20 +75,16 @@ model Product {
   /// Flat measurements in cm, e.g. {"chest":48,"shoulders":40}.
   measurements Json @default("{}")
 
-  /// A real Postgres text array now, rather than the Json workaround SQLite
-  /// forced. Ordered: images[0] is the cover shot.
+  /// Ordered — images[0] is the cover shot.
   images String[] @default([])
 
-  /// Defaults to draft so nothing imported from Instagram goes live without
-  /// being reviewed in /admin first.
   status ProductStatus @default(draft)
 
-  /// Free-text condition notes shown on the product page.
   conditionNotes String?
+  sourceCaption  String?
 
-  /// The original caption an import was parsed from, kept for auditing when an
-  /// extraction turns out wrong.
-  sourceCaption String?
+  cartItems  CartItem[]
+  orderItems OrderItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -86,4 +92,82 @@ model Product {
   @@index([status])
   @@index([brand])
   @@index([createdAt])
+}
+
+/// A signed-in user's cart, keyed by the Neon Auth user id.
+model Cart {
+  id String @id @default(cuid())
+
+  /// From the Neon Auth session. One cart per user.
+  userId String @unique
+
+  items CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Archive pieces are one of a kind, so there is no quantity column: a product
+/// is either in a cart or it is not. The compound unique makes adding the same
+/// piece twice a no-op rather than a duplicate row.
+model CartItem {
+  id String @id @default(cuid())
+
+  cartId String
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  addedAt DateTime @default(now())
+
+  @@unique([cartId, productId])
+  @@index([productId])
+}
+
+model Order {
+  id String @id @default(cuid())
+
+  /// Neon Auth user id. Nullable so an order survives account deletion.
+  userId String?
+  email  String
+
+  status OrderStatus @default(pending)
+
+  /// Total in CHF at the time of ordering, so a later price edit cannot
+  /// retroactively change what someone was charged.
+  totalCHF Int
+
+  stripeSessionId       String? @unique
+  stripePaymentIntentId String?
+
+  shippingName    String?
+  shippingAddress Json?
+
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+/// A line on an order. Brand/name/price are copied rather than referenced so
+/// the order still reads correctly if the product is later edited or deleted.
+model OrderItem {
+  id String @id @default(cuid())
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  brand    String
+  name     String
+  size     String
+  priceCHF Int
+
+  @@index([orderId])
 }

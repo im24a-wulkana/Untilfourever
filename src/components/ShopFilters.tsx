@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { brands, categories, sizes } from "@/data/products";
 
 export interface ShopQuery {
   brand?: string;
@@ -80,7 +79,24 @@ function FilterRow({
   );
 }
 
-export function ShopFilters({ current }: { current: ShopQuery }) {
+export interface Facets {
+  brands: string[];
+  sizes: string[];
+  categories: string[];
+}
+
+export function ShopFilters({
+  current,
+  facets,
+}: {
+  current: ShopQuery;
+  facets: Facets;
+}) {
+  const { brands, sizes, categories } = facets;
+
+  // With an empty catalogue there is nothing to filter by.
+  if (brands.length === 0) return null;
+
   return (
     <section aria-label="Filter the archive" className="border-b border-hairline">
       <div className="divide-y divide-hairline px-5 md:px-8">

@@ -1,12 +1,22 @@
 import { instagramDmUrl, site } from "@/data/site";
-import type { Product } from "@/data/types";
+
 import { formatPrice } from "./Price";
 
 /**
  * No cart and no form. A prefilled mailto carrying everything needed to
  * identify the piece, plus an Instagram DM as the secondary route.
  */
-export function EnquireLinks({ product }: { product: Product }) {
+export interface EnquireProduct {
+  id: string;
+  brand: string;
+  season: string;
+  name: string;
+  size: string;
+  priceCHF: number;
+  sold?: boolean;
+}
+
+export function EnquireLinks({ product }: { product: EnquireProduct }) {
   const subject = `Enquiry — ${product.brand} ${product.season} ${product.name} (${product.id})`;
 
   const body = [

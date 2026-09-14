@@ -32,7 +32,6 @@ export const shipping = {
 
 export const nav = [
   { href: "/shop", label: "Shop" },
-  { href: "/archive", label: "Archive" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ] as const;

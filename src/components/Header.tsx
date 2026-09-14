@@ -1,11 +1,16 @@
 import Link from "next/link";
 import { nav, site } from "@/data/site";
+import { getUser } from "@/lib/auth";
+import { getCartCount } from "@/lib/cart";
 
 /**
  * Wordmark left, nav right, hairline underneath. No logo mark.
  * Sits above the grain overlay so the type stays crisp.
  */
-export function Header() {
+export async function Header() {
+  const user = await getUser();
+  const cartCount = user ? await getCartCount() : 0;
+
   return (
     <header className="relative z-10 border-b border-hairline bg-black">
       {/* Four caps items at 0.12em tracking do not fit beside the wordmark on a
@@ -28,6 +33,24 @@ export function Header() {
                 </Link>
               </li>
             ))}
+
+            <li>
+              <Link
+                href="/cart"
+                className="rule-link text-label uppercase tracking-caps text-bone"
+              >
+                Cart{cartCount > 0 ? ` (${cartCount})` : ""}
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href={user ? "/account" : "/sign-in"}
+                className="rule-link text-label uppercase tracking-caps text-bone"
+              >
+                {user ? "Account" : "Sign in"}
+              </Link>
+            </li>
           </ul>
         </nav>
       </div>

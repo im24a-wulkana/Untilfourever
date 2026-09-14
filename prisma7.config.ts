@@ -9,6 +9,12 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Migrations need a DIRECT connection: Neon's pooled endpoint (pgbouncer)
+    // closes the long-lived transactions DDL requires, which surfaces as
+    // "P1017 Server has closed the connection". Set DIRECT_URL explicitly, or
+    // let this derive it by dropping "-pooler" from the pooled host.
+    url:
+      process.env["DIRECT_URL"] ??
+      process.env["DATABASE_URL"]?.replace("-pooler", ""),
   },
 });

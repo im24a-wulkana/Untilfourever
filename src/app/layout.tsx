@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Jost } from "next/font/google";
 import { site } from "@/data/site";
+import { AuthProvider } from "@/components/AuthProvider";
 import "./globals.css";
 
 /**
@@ -54,7 +55,7 @@ export default function RootLayout({
       {/* Chrome lives in the route group layouts: the splash has none, every
           other page has header and footer. */}
       <body className="grain flex min-h-dvh flex-col bg-black text-bone">
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

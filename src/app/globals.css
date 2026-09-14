@@ -166,9 +166,10 @@ hr {
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  /* Tracking adds trailing space after the last letter; pull it back so the
-     mark is optically centred rather than sitting slightly left. */
-  text-indent: 0.2em;
+  /* No text-indent. The browser already accounts for the trailing
+     letter-spacing when centring, so any indent here is pure offset: measured
+     at 52px, +0.2em pushed the mark 10.4px right and -0.2em pushed it 10.4px
+     left. Leaving it out is what actually centres. */
 }
 
 @utility fade-link {

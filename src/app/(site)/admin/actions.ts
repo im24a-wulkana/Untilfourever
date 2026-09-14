@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { Category, Condition } from "@prisma/client";
+import { requireAdmin } from "@/lib/auth";
+import { slugify } from "@/lib/products";
 import { extractFromCaption } from "@/lib/extract";
 
 import type { ParseState, SaveState } from "./types";
@@ -15,6 +17,7 @@ export async function parseCaption(
   _prev: ParseState,
   formData: FormData,
 ): Promise<ParseState> {
+  await requireAdmin();
   const caption = String(formData.get("caption") ?? "");
 
   try {
@@ -57,6 +60,8 @@ export async function saveProduct(
   _prev: SaveState,
   formData: FormData,
 ): Promise<SaveState> {
+  await requireAdmin();
+
   const brand = optional(formData.get("brand"));
   const name = optional(formData.get("name"));
   const priceRaw = optional(formData.get("priceCHF"));
@@ -94,8 +99,16 @@ export async function saveProduct(
   }
 
   try {
+    const base = slugify(brand, optional(formData.get("season")) ?? "", name);
+    let slug = base || `piece-${Date.now()}`;
+    // Slug is unique; on collision append a short suffix rather than failing.
+    if (await db.product.findUnique({ where: { slug } })) {
+      slug = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
+    }
+
     const product = await db.product.create({
       data: {
+        slug,
         brand,
         name,
         priceCHF: Math.round(priceCHF),
@@ -120,4 +133,35 @@ export async function saveProduct(
       message: error instanceof Error ? error.message : "Could not save.",
     };
   }
+}
+
+/** Publish or unpublish a piece. */
+export async function setStatusAction(formData: FormData) {
+  await requireAdmin();
+
+  const id = String(formData.get("id") ?? "");
+  const status = String(formData.get("status") ?? "");
+
+  if (!id || !["draft", "live", "sold"].includes(status)) return;
+
+  await db.product.update({
+    where: { id },
+    data: { status: status as "draft" | "live" | "sold" },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/shop");
+}
+
+/** Delete a piece outright. */
+export async function deleteProductAction(formData: FormData) {
+  await requireAdmin();
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  await db.product.delete({ where: { id } });
+
+  revalidatePath("/admin");
+  revalidatePath("/shop");
 }
