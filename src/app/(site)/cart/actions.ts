@@ -21,7 +21,7 @@ export async function addToCartAction(formData: FormData) {
 
   if (!user) {
     const slug = String(formData.get("slug") ?? "");
-    redirect(`/sign-in?next=${encodeURIComponent(`/shop/${slug}`)}`);
+    redirect(`/auth/sign-in?next=${encodeURIComponent(`/shop/${slug}`)}`);
   }
 
   await addToCart(user.id, productId);

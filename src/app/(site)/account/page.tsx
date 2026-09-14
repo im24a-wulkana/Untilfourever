@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AccountPage() {
   const user = await getUser();
-  if (!user) redirect("/sign-in?next=/account");
+  if (!user) redirect("/auth/sign-in?next=/account");
 
   const orders = await db.order.findMany({
     where: { userId: user.id },
@@ -28,6 +28,15 @@ export default async function AccountPage() {
     <div className="px-5 py-10 md:px-8 md:py-14">
       <h1 className="text-label-lg uppercase tracking-caps text-meta">Account</h1>
       <p className="mt-4 text-body text-bone">{user.email}</p>
+
+      <p className="mt-3">
+        <Link
+          href="/account/settings"
+          className="rule-link text-label uppercase tracking-caps text-meta"
+        >
+          Settings — password, email, sessions
+        </Link>
+      </p>
 
       {admin ? (
         <p className="mt-4">

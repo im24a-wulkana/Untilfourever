@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { shipping, site } from "@/data/site";
+import { instagramUrl, shipping } from "@/data/site";
 
 export const metadata: Metadata = {
   title: "About",
@@ -37,25 +36,11 @@ export default function AboutPage() {
       <header className="border-b border-hairline px-5 py-12 md:px-8 md:py-20">
         <h1 className="text-label-lg uppercase tracking-caps text-meta">About</h1>
         <p className="mt-6 max-w-[48ch] text-editorial text-bone">
-          A small archive run out of {site.city}, dealing almost entirely in
+          A small archive dealing almost entirely in
           Slimane-era Dior Homme, Saint Laurent Paris and Celine, plus the
           indie and punk pieces that sat alongside them.
         </p>
       </header>
-
-      <Section title="How we work">
-        <p className="text-editorial text-bone">
-          Everything is bought in person or from people we have dealt with
-          before. Each piece is checked seam by seam, measured flat, and
-          photographed as it actually is — the same lighting for every item, no
-          retouching of flaws, no colour correction to hide wear.
-        </p>
-        <p className="text-editorial text-bone">
-          If a piece has moth, a repair, coating loss or a mark, it is written
-          into the condition notes and photographed close. We would rather lose
-          a sale than have something arrive unexpected.
-        </p>
-      </Section>
 
       <Section title="Condition grading">
         <dl className="space-y-3">
@@ -102,31 +87,20 @@ export default function AboutPage() {
           ))}
         </dl>
         <p className="text-body text-meta">
-          Everything ships tracked and insured. Orders leave {site.city} within
-          two working days of payment clearing.
-        </p>
-      </Section>
-
-      <Section title="Returns">
-        <p className="text-editorial text-bone">
-          Fourteen days from delivery, for any reason. The piece must come back
-          in the condition it was sent. Return postage is on the buyer unless the
-          item was not as described — in which case we cover it both ways.
-        </p>
-        <p className="text-editorial text-bone">
-          Secondhand archive is sold as seen, but &ldquo;as seen&rdquo; only
-          works if the description is complete. If something arrives that does
-          not match the notes, tell us and it is refunded in full.
+          Everything ships tracked and insured. Orders leave within two working
+          days of payment clearing.
         </p>
       </Section>
 
       <section className="px-5 py-10 md:px-8 md:py-14">
-        <Link
-          href="/contact"
+        <a
+          href={instagramUrl}
+          target="_blank"
+          rel="noreferrer noopener"
           className="rule-link text-label-lg uppercase tracking-caps text-bone"
         >
-          Get in touch
-        </Link>
+          Get in touch on Instagram
+        </a>
       </section>
     </div>
   );

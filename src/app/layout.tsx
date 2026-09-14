@@ -50,8 +50,22 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // suppressHydrationWarning below applies to <html> only.
+  //
+  // @neondatabase/auth-ui depends on next-themes, which writes a theme class
+  // and color-scheme onto <html> as soon as it mounts. The server cannot know
+  // that value, so React reports a mismatch on this element. Suppressing it is
+  // the documented fix for theme providers, and it does not extend to children
+  // — a mismatch anywhere else still surfaces as an error.
+  //
+  // The site is black-only; globals.css pins color-scheme to dark so the
+  // provider cannot flip native controls to light.
   return (
-    <html lang="en" className={`${inter.variable} ${jost.variable}`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${jost.variable}`}
+    >
       {/* Chrome lives in the route group layouts: the splash has none, every
           other page has header and footer. */}
       <body className="grain flex min-h-dvh flex-col bg-black text-bone">

@@ -7,16 +7,16 @@ export const site = {
   name: "untilfourever",
   title: "untilfourever — archive",
   description:
-    "Secondhand designer archive. Dior Homme 2000–07, Saint Laurent Paris 2012–16, Celine 2018–19, and adjacent indie and punk archive. Shipped from Zürich.",
+    "Secondhand designer archive. Dior Homme 2000–07, Saint Laurent Paris 2012–16, Celine 2018–19, and adjacent indie and punk archive. Shipped worldwide from Europe.",
   url: "https://untilfourever.ch",
 
-  // --- REPLACE THESE -------------------------------------------------------
-  email: "archive@untilfourever.ch",
+  // --- REPLACE THIS --------------------------------------------------------
+  // Instagram is the only contact route: there is no email address anywhere on
+  // the site, and no /contact page.
   instagramHandle: "untilfourever",
   // -------------------------------------------------------------------------
 
-  city: "Zürich",
-  country: "Switzerland",
+  shipsFrom: "Europe",
 } as const;
 
 export const instagramUrl = `https://instagram.com/${site.instagramHandle}`;
@@ -25,13 +25,19 @@ export const instagramUrl = `https://instagram.com/${site.instagramHandle}`;
 export const instagramDmUrl = `https://ig.me/m/${site.instagramHandle}`;
 
 export const shipping = {
-  ch: { label: "Switzerland", price: "CHF 9", detail: "Swiss Post, 2–3 working days, tracked." },
-  eu: { label: "Europe", price: "CHF 25", detail: "DHL, 3–6 working days, tracked and signed for." },
-  world: { label: "Rest of world", price: "CHF 45", detail: "DHL, 5–10 working days. Duties payable on arrival." },
+  eu: {
+    label: "Europe",
+    price: "CHF 15",
+    detail: "Tracked and signed for, 2–5 working days.",
+  },
+  world: {
+    label: "Rest of world",
+    price: "CHF 45",
+    detail: "DHL, 5–10 working days. Duties payable on arrival.",
+  },
 } as const;
 
 export const nav = [
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
 ] as const;

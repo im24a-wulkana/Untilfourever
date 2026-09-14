@@ -45,7 +45,7 @@ export async function Header() {
 
             <li>
               <Link
-                href={user ? "/account" : "/sign-in"}
+                href={user ? "/account" : "/auth/sign-in"}
                 className="rule-link text-label uppercase tracking-caps text-bone"
               >
                 {user ? "Account" : "Sign in"}
