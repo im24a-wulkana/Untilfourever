@@ -1,0 +1,89 @@
+// untilfourever — product schema
+//
+// Postgres (Neon). Local development points at a Neon dev branch, so there is
+// one provider and one set of migrations everywhere — no SQLite/Postgres drift.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// The connection URL lives in prisma7.config.ts (which reads DATABASE_URL);
+// Prisma 7 no longer accepts `url` here.
+datasource db {
+  provider = "postgresql"
+}
+
+/// Real enums, enforced by the database. Under SQLite these had to be plain
+/// strings with the allowed values only documented in a comment.
+enum ProductStatus {
+  draft
+  live
+  sold
+}
+
+enum Condition {
+  deadstock
+  excellent
+  very_good @map("very good")
+  good
+  worn
+}
+
+enum Category {
+  outerwear
+  tailoring
+  knitwear
+  shirting
+  denim
+  trousers
+  footwear
+  accessories
+}
+
+model Product {
+  id String @id @default(cuid())
+
+  /// Instagram media id. Nullable and unique: null means hand-entered in
+  /// /admin, non-null means imported. This is the dedupe key — an import can
+  /// safely upsert on it without creating duplicates on re-sync.
+  ///
+  /// NULLs are not equal to each other in Postgres, so the unique index still
+  /// permits many hand-entered rows. That is the intent.
+  igMediaId String? @unique
+
+  brand    String
+  designer String?
+  season   String
+  name     String
+  size     String
+
+  category  Category?
+  condition Condition?
+
+  priceCHF Int
+
+  /// Flat measurements in cm, e.g. {"chest":48,"shoulders":40}.
+  measurements Json @default("{}")
+
+  /// A real Postgres text array now, rather than the Json workaround SQLite
+  /// forced. Ordered: images[0] is the cover shot.
+  images String[] @default([])
+
+  /// Defaults to draft so nothing imported from Instagram goes live without
+  /// being reviewed in /admin first.
+  status ProductStatus @default(draft)
+
+  /// Free-text condition notes shown on the product page.
+  conditionNotes String?
+
+  /// The original caption an import was parsed from, kept for auditing when an
+  /// extraction turns out wrong.
+  sourceCaption String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([brand])
+  @@index([createdAt])
+}

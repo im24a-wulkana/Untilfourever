@@ -1,0 +1,24 @@
+node_modules/
+.next/
+out/
+build/
+
+# Managed by Next.js — do not edit or commit
+next-env.d.ts
+
+# Secrets. .env holds DATABASE_URL and ANTHROPIC_API_KEY.
+# Note: ".env*.local" alone does NOT match a plain ".env".
+.env
+.env*.local
+
+# Local SQLite database and its journals — never committed.
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+.vercel
+*.tsbuildinfo
+
+.DS_Store
+Thumbs.db
