@@ -70,7 +70,7 @@ model Product {
   category  Category?
   condition Condition?
 
-  priceCHF Int
+  priceUSD Int
 
   /// Flat measurements in cm, e.g. {"chest":48,"shoulders":40}.
   measurements Json @default("{}")
@@ -134,9 +134,9 @@ model Order {
 
   status OrderStatus @default(pending)
 
-  /// Total in CHF at the time of ordering, so a later price edit cannot
+  /// Total in USD at the time of ordering, so a later price edit cannot
   /// retroactively change what someone was charged.
-  totalCHF Int
+  totalUSD Int
 
   stripeSessionId       String? @unique
   stripePaymentIntentId String?
@@ -167,7 +167,7 @@ model OrderItem {
   brand    String
   name     String
   size     String
-  priceCHF Int
+  priceUSD Int
 
   @@index([orderId])
 }

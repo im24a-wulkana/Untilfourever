@@ -59,10 +59,10 @@ export default async function AccountPage() {
               <li key={order.id} className="py-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <span className="text-label uppercase tracking-caps text-meta">
-                    {order.createdAt.toLocaleDateString("de-CH")} · {order.status}
+                    {order.createdAt.toLocaleDateString("en-US")} · {order.status}
                   </span>
                   <span className="text-body text-bone">
-                    {formatPrice(order.totalCHF)}
+                    {formatPrice(order.totalUSD)}
                   </span>
                 </div>
                 <ul className="mt-2 space-y-0.5">

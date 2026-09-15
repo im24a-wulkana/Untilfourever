@@ -63,7 +63,7 @@ export default async function AdminPage() {
                   {p.size}
                 </span>
                 <span className="text-label uppercase tracking-caps text-meta">
-                  CHF {p.priceCHF}
+                  ${p.priceUSD}
                 </span>
                 {p.igMediaId ? (
                   <span className="text-label uppercase tracking-caps text-meta">

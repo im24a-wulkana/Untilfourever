@@ -6,7 +6,7 @@ import { getCart } from "@/lib/cart";
 import { productImages } from "@/lib/products";
 import { formatPrice } from "@/components/Price";
 import { removeFromCartAction } from "./actions";
-import { checkoutAction } from "./checkout";
+import { CheckoutButton } from "./CheckoutButton";
 
 export const metadata: Metadata = {
   title: "Cart",
@@ -40,7 +40,7 @@ export default async function CartPage() {
 
   const cart = await getCart();
   const items = cart?.items ?? [];
-  const total = cart?.totalCHF ?? 0;
+  const total = cart?.totalUSD ?? 0;
   const hasAvailable = items.some((i) => !i.unavailable);
 
   return (
@@ -98,7 +98,7 @@ export default async function CartPage() {
 
                     <div className="flex flex-col items-end gap-2">
                       <span className="text-body text-bone">
-                        {formatPrice(item.product.priceCHF)}
+                        {formatPrice(item.product.priceUSD)}
                       </span>
                       <form action={removeFromCartAction}>
                         <input
@@ -132,14 +132,7 @@ export default async function CartPage() {
           </p>
 
           {hasAvailable ? (
-            <form action={checkoutAction} className="mt-8">
-              <button
-                type="submit"
-                className="inline-block border border-bone px-6 py-4 text-label uppercase tracking-caps text-bone transition-opacity duration-150 hover:opacity-60"
-              >
-                Checkout
-              </button>
-            </form>
+            <CheckoutButton />
           ) : (
             <p className="mt-8 text-body text-meta">
               Nothing in the cart is still available.

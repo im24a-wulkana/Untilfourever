@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -10,7 +9,8 @@ import {
 } from "@/lib/products";
 import { getUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { Price } from "@/components/Price";
+import { formatPrice } from "@/components/Price";
+import { ProductGallery } from "@/components/ProductGallery";
 import { EnquireLinks } from "@/components/EnquireLinks";
 import { addToCartAction } from "../../cart/actions";
 
@@ -40,8 +40,19 @@ export async function generateMetadata({
 
   return {
     title: `${product.brand} ${product.season} — ${product.name}`,
-    description: `${product.brand}, ${product.season}. Size ${product.size}. ${product.conditionNotes ?? ""}`.trim(),
+    description:
+      `${product.brand}, ${product.season}. Size ${product.size}. ${product.conditionNotes ?? ""}`.trim(),
   };
+}
+
+/** One spec row. Hairline-ruled, label left, value right. */
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-baseline justify-between border-b border-hairline py-2.5">
+      <dt className="text-label uppercase tracking-caps text-meta">{label}</dt>
+      <dd className="text-body text-bone">{children}</dd>
+    </div>
+  );
 }
 
 export default async function ProductPage({
@@ -56,6 +67,7 @@ export default async function ProductPage({
   const images = productImages(product);
   const measurements = measurementEntries(product);
   const sold = product.status === "sold";
+  const title = `${product.brand} ${product.season} — ${product.name}`;
 
   const user = await getUser();
   const inCart = user
@@ -65,134 +77,130 @@ export default async function ProductPage({
       }))
     : false;
 
-  // On a phone the columns stack, and with the images first a buyer had to
-  // scroll past every photograph before seeing the price or the buy button.
-  // flex-col-reverse puts the details first below md; the desktop grid is
-  // untouched.
   return (
-    <article className="flex flex-col-reverse md:grid md:grid-cols-[1fr_minmax(20rem,26rem)]">
-      <div className="border-hairline md:border-r">
-        <h1 className="sr-only">
-          {product.brand} {product.season} — {product.name}
-        </h1>
+    <article data-touch-target className="px-5 py-6 md:px-8 md:py-10">
+      <p className="mb-6">
+        <Link
+          href="/shop"
+          className="rule-link text-label uppercase tracking-caps text-meta"
+        >
+          ← Back to shop
+        </Link>
+      </p>
 
-        {images.length === 0 ? (
-          <div className="flex aspect-[3/4] w-full items-center justify-center border-b border-hairline">
-            <span className="text-label uppercase tracking-caps text-meta">
-              No photographs yet
-            </span>
-          </div>
-        ) : (
-          images.map((src, index) => (
-            <div key={src} className="relative aspect-[3/4] w-full">
-              <Image
-                src={src}
-                alt={`${product.brand} ${product.season} — ${product.name}, image ${index + 1}`}
-                fill
-                priority={index === 0}
-                sizes="(max-width: 768px) 100vw, 60vw"
-                className="object-cover"
-              />
-            </div>
-          ))
-        )}
-      </div>
+      {/* Gallery beside the details on desktop, stacked on a phone with the
+          photograph first. The page was previously a vertical stack of every
+          shot, which made a four-image piece four screens tall. */}
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-12">
+        <ProductGallery images={images} alt={title} />
 
-      <div className="on-bone bg-bone text-black">
-        <div className="md:sticky md:top-0 md:max-h-dvh md:overflow-y-auto">
-          <div className="space-y-5 px-5 py-8 md:px-7">
-            <header className="space-y-1">
-              <p className="text-label uppercase tracking-caps text-meta">
-                {product.brand}
-              </p>
-              <p className="text-label uppercase tracking-caps text-meta">
-                {product.season}
-              </p>
-              <p className="text-editorial text-black">{product.name}</p>
-            </header>
+        <div className="lg:sticky lg:top-8 lg:self-start">
+          <header className="border-b border-hairline pb-5">
+            <p className="text-label uppercase tracking-caps text-meta">
+              {product.brand}
+              {product.designer ? ` · ${product.designer}` : ""}
+            </p>
+            <h1 className="mt-2 text-editorial text-bone">{product.name}</h1>
+            <p className="mt-1 text-label uppercase tracking-caps text-meta">
+              {product.season}
+            </p>
 
-            <dl className="border-t border-hairline pt-5">
-              <div className="flex justify-between border-b border-hairline py-1">
-                <dt className="text-label uppercase tracking-caps text-meta">Size</dt>
-                <dd className="text-body">{product.size}</dd>
-              </div>
-              {product.condition ? (
-                <div className="flex justify-between border-b border-hairline py-1">
-                  <dt className="text-label uppercase tracking-caps text-meta">
-                    Condition
-                  </dt>
-                  <dd className="text-body capitalize">
-                    {conditionLabel(product.condition)}
-                  </dd>
-                </div>
+            <p className="mt-5 flex items-baseline gap-3">
+              <span className="text-editorial text-bone">
+                {sold ? (
+                  <s className="text-meta">{formatPrice(product.priceUSD)}</s>
+                ) : (
+                  formatPrice(product.priceUSD)
+                )}
+              </span>
+              {sold ? (
+                <span className="text-label uppercase tracking-caps text-meta">
+                  Sold
+                </span>
               ) : null}
-              <div className="flex justify-between border-b border-hairline py-1">
-                <dt className="text-label uppercase tracking-caps text-meta">Price</dt>
-                <dd className="text-body">
-                  <Price priceCHF={product.priceCHF} sold={sold} />
-                </dd>
-              </div>
-            </dl>
+            </p>
+          </header>
 
-            {product.conditionNotes ? (
-              <div className="border-t border-hairline pt-5">
-                <h2 className="text-label uppercase tracking-caps text-meta">
-                  Condition notes
-                </h2>
-                <p className="mt-2 text-body text-black">
-                  {product.conditionNotes}
-                </p>
-              </div>
+          <dl className="mt-5">
+            <Row label="Size">{product.size}</Row>
+            {product.condition ? (
+              <Row label="Condition">
+                <span className="capitalize">
+                  {conditionLabel(product.condition)}
+                </span>
+              </Row>
             ) : null}
-
-            {measurements.length > 0 ? (
-              <div className="border-t border-hairline pt-5">
-                <h2 className="text-label uppercase tracking-caps text-meta">
-                  Measurements — flat, cm
-                </h2>
-                <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1">
-                  {measurements.map(([key, value]) => (
-                    <div
-                      key={key}
-                      className="flex justify-between border-b border-hairline py-1"
-                    >
-                      <dt className="text-label uppercase tracking-caps text-meta">
-                        {MEASUREMENT_LABELS[key] ?? key}
-                      </dt>
-                      <dd className="text-body text-black">{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
+            {product.category ? (
+              <Row label="Type">
+                <span className="capitalize">{product.category}</span>
+              </Row>
             ) : null}
+          </dl>
 
-            {/* Add to cart, unless it has sold or is already in there. */}
-            {!sold ? (
-              inCart ? (
-                <div className="border-t border-hairline pt-5">
-                  <p className="text-label uppercase tracking-caps text-meta">
-                    In your cart
-                  </p>
-                  <p className="mt-2">
-                    <Link href="/cart" className="rule-link text-body text-black">
-                      Go to cart
-                    </Link>
-                  </p>
-                </div>
-              ) : (
-                <form action={addToCartAction} className="border-t border-hairline pt-5">
-                  <input type="hidden" name="productId" value={product.id} />
-                  <input type="hidden" name="slug" value={product.slug} />
-                  <button
-                    type="submit"
-                    className="inline-block border border-black px-6 py-3 text-label uppercase tracking-caps text-black transition-opacity duration-150 ease-out hover:opacity-55"
+          {/* Buying comes before the reference material: someone who has
+              already decided should not scroll past measurements to act. */}
+          <div className="mt-6">
+            {sold ? (
+              <p className="border border-hairline px-5 py-3.5 text-center text-label uppercase tracking-caps text-meta">
+                Sold
+              </p>
+            ) : inCart ? (
+              <Link
+                href="/cart"
+                className="block border border-bone px-5 py-4 text-center text-label uppercase tracking-caps text-bone transition-opacity duration-150 hover:opacity-60"
+              >
+                In your cart — go to cart
+              </Link>
+            ) : (
+              <form action={addToCartAction}>
+                <input type="hidden" name="productId" value={product.id} />
+                <input type="hidden" name="slug" value={product.slug} />
+                <button
+                  type="submit"
+                  className="w-full border border-bone px-5 py-4 text-label uppercase tracking-caps text-bone transition-opacity duration-150 hover:opacity-60"
+                >
+                  Add to cart
+                </button>
+              </form>
+            )}
+          </div>
+
+          {product.conditionNotes ? (
+            <section className="mt-8 border-t border-hairline pt-5">
+              <h2 className="text-label uppercase tracking-caps text-meta">
+                Condition
+              </h2>
+              <p className="mt-2 max-w-[56ch] text-body text-bone">
+                {product.conditionNotes}
+              </p>
+            </section>
+          ) : null}
+
+          {measurements.length > 0 ? (
+            <section className="mt-8 border-t border-hairline pt-5">
+              <h2 className="text-label uppercase tracking-caps text-meta">
+                Measurements — flat, cm
+              </h2>
+              <dl className="mt-3 grid grid-cols-2 gap-x-8">
+                {measurements.map(([key, value]) => (
+                  <div
+                    key={key}
+                    className="flex items-baseline justify-between border-b border-hairline py-2"
                   >
-                    Add to cart
-                  </button>
-                </form>
-              )
-            ) : null}
+                    <dt className="text-label uppercase tracking-caps text-meta">
+                      {MEASUREMENT_LABELS[key] ?? key}
+                    </dt>
+                    <dd className="text-body text-bone">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-3 text-label uppercase tracking-caps text-meta">
+                Measure a piece you own and compare
+              </p>
+            </section>
+          ) : null}
 
+          <div className="mt-8">
             <EnquireLinks
               product={{
                 id: product.id,
@@ -200,16 +208,10 @@ export default async function ProductPage({
                 season: product.season,
                 name: product.name,
                 size: product.size,
-                priceCHF: product.priceCHF,
+                priceUSD: product.priceUSD,
                 sold,
               }}
             />
-
-            <p className="border-t border-hairline pt-5 text-label uppercase tracking-caps text-meta">
-              <Link href="/shop" className="rule-link text-black">
-                Back to shop
-              </Link>
-            </p>
           </div>
         </div>
       </div>

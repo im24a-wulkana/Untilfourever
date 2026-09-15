@@ -65,7 +65,7 @@ export async function saveProduct(
 
   const brand = optional(formData.get("brand"));
   const name = optional(formData.get("name"));
-  const priceRaw = optional(formData.get("priceCHF"));
+  const priceRaw = optional(formData.get("priceUSD"));
 
   if (!brand || !name || !priceRaw) {
     return {
@@ -74,8 +74,8 @@ export async function saveProduct(
     };
   }
 
-  const priceCHF = Number(priceRaw);
-  if (!Number.isFinite(priceCHF) || priceCHF < 0) {
+  const priceUSD = Number(priceRaw);
+  if (!Number.isFinite(priceUSD) || priceUSD < 0) {
     return { status: "error", message: "Price must be a positive number." };
   }
 
@@ -124,7 +124,7 @@ export async function saveProduct(
         slug,
         brand,
         name,
-        priceCHF: Math.round(priceCHF),
+        priceUSD: Math.round(priceUSD),
         designer: optional(formData.get("designer")),
         season: optional(formData.get("season")) ?? "",
         category: asEnum(Category, formData.get("category")),

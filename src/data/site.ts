@@ -27,12 +27,12 @@ export const instagramDmUrl = `https://ig.me/m/${site.instagramHandle}`;
 export const shipping = {
   eu: {
     label: "Europe",
-    price: "CHF 15",
+    price: "$15",
     detail: "Tracked and signed for, 2–5 working days.",
   },
   world: {
     label: "Rest of world",
-    price: "CHF 45",
+    price: "$45",
     detail: "DHL, 5–10 working days. Duties payable on arrival.",
   },
 } as const;

@@ -138,10 +138,10 @@ export function AdminForm() {
           <p className="text-body text-meta">{parsed.notes}</p>
         ) : null}
 
-        {parsed?.price != null && parsed.currency && parsed.currency !== "CHF" ? (
+        {parsed?.price != null && parsed.currency && parsed.currency !== "USD" ? (
           <p className="border border-hairline px-4 py-3 text-body text-bone">
             Caption priced this at {parsed.price} {parsed.currency}. The shop
-            prices in CHF — convert it before saving.
+            prices in USD — convert it before saving.
           </p>
         ) : null}
 
@@ -197,10 +197,10 @@ export function AdminForm() {
           </p>
 
           <Field
-            name="priceCHF"
-            label="Price CHF"
+            name="priceUSD"
+            label="Price USD"
             defaultValue={
-              parsed?.currency === "CHF" && parsed.price != null
+              parsed?.currency === "USD" && parsed.price != null
                 ? String(parsed.price)
                 : ""
             }

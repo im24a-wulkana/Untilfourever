@@ -29,7 +29,7 @@ export async function getCart() {
     },
   });
 
-  if (!cart) return { items: [], totalCHF: 0 };
+  if (!cart) return { items: [], totalUSD: 0 };
 
   // A piece that sold while sitting in a cart must not be checked out. It
   // stays visible so the person can see what happened, but is not billable.
@@ -38,11 +38,11 @@ export async function getCart() {
     unavailable: item.product.status !== "live",
   }));
 
-  const totalCHF = items
+  const totalUSD = items
     .filter((i) => !i.unavailable)
-    .reduce((sum, i) => sum + i.product.priceCHF, 0);
+    .reduce((sum, i) => sum + i.product.priceUSD, 0);
 
-  return { items, totalCHF };
+  return { items, totalUSD };
 }
 
 export async function getCartCount(): Promise<number> {

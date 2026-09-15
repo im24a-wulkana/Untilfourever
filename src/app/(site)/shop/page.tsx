@@ -73,7 +73,7 @@ export default async function ShopPage({
                 season={product.season}
                 name={product.name}
                 size={product.size}
-                priceCHF={product.priceCHF}
+                priceUSD={product.priceUSD}
                 sold={product.status === "sold"}
                 image={productImages(product)[0] ?? null}
                 priority={index < 4}

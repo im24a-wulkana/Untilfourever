@@ -10,7 +10,7 @@ export interface EnquireProduct {
   season: string;
   name: string;
   size: string;
-  priceCHF: number;
+  priceUSD: number;
   sold?: boolean;
 }
 

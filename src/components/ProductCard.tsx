@@ -15,7 +15,7 @@ export function ProductCard({
   season,
   name,
   size,
-  priceCHF,
+  priceUSD,
   sold,
   image,
   priority = false,
@@ -26,7 +26,7 @@ export function ProductCard({
   season: string;
   name: string;
   size: string;
-  priceCHF: number;
+  priceUSD: number;
   sold?: boolean;
   image: string | null;
   priority?: boolean;
@@ -58,7 +58,7 @@ export function ProductCard({
           <p className="text-meta">{season}</p>
           <p className="normal-case tracking-normal text-bone">{name}</p>
           <p className="text-meta">
-            {size} · <Price priceCHF={priceCHF} sold={sold} />
+            {size} · <Price priceUSD={priceUSD} sold={sold} />
           </p>
         </div>
       </Link>

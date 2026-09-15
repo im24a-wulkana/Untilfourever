@@ -111,7 +111,7 @@ const schema = {
       type: ["string", "null"],
       enum: ["CHF", "USD", "EUR", "GBP", null],
       description:
-        'The currency actually written. "400$" is USD, "400.-" or "400 CHF" is CHF. Do NOT default to CHF — the shop prices in CHF, so a wrong guess here silently mis-prices a piece.',
+        'The currency actually written. "400$" is USD, "400.-" or "400 CHF" is CHF, "400€" is EUR. Do NOT default to USD — the shop prices in USD, so a wrong guess here silently mis-prices a piece.',
     },
     measurements: {
       // A plain object, not ["object","null"]: the API rejects
@@ -177,7 +177,7 @@ being sold for real money. Never infer:
   - a condition from the absence of mentioned flaws
   - a designer from the brand and season, however well known the pairing
   - measurements from a size
-  - a currency from the fact that the shop prices in CHF
+  - a currency from the fact that the shop prices in USD
 
 Set confident to false whenever you had to stretch, and say why in notes.`;
 

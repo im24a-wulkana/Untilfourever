@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getCart } from "@/lib/cart";
 import { site } from "@/data/site";
+import type { CheckoutState } from "./types";
 
 /**
  * Creates a Stripe Checkout session for the signed-in user's cart.
@@ -15,17 +16,29 @@ import { site } from "@/data/site";
  * anyone pay one franc for a three-thousand franc jacket by editing the
  * request before it is sent.
  */
-export async function checkoutAction() {
+export async function checkoutAction(
+  _prev: CheckoutState,
+  _formData: FormData,
+): Promise<CheckoutState> {
   const user = await requireUser();
 
+  // Returned rather than thrown: Next replaces a thrown server-action error
+  // with "A server error occurred" in production, which tells the shopper
+  // nothing and hides the actual cause from the operator too.
   const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error("STRIPE_SECRET_KEY is not set.");
+  if (!key) {
+    return {
+      status: "error",
+      message:
+        "Payments are not configured yet. Add STRIPE_SECRET_KEY to the environment — see .env.example.",
+    };
+  }
 
   const cart = await getCart();
   const items = (cart?.items ?? []).filter((i) => !i.unavailable);
 
   if (items.length === 0) {
-    throw new Error("Nothing in the cart is available.");
+    return { status: "error", message: "Nothing in the cart is available." };
   }
 
   // Re-check availability at the moment of checkout: a piece can sell between
@@ -36,10 +49,13 @@ export async function checkoutAction() {
   });
 
   if (live.length === 0) {
-    throw new Error("Those pieces have sold.");
+    return {
+      status: "error",
+      message: "Those pieces have sold while they were in your cart.",
+    };
   }
 
-  const totalCHF = live.reduce((sum, p) => sum + p.priceCHF, 0);
+  const totalUSD = live.reduce((sum, p) => sum + p.priceUSD, 0);
 
   // The order is recorded as pending first, so a completed payment always has
   // somewhere to land even if the webhook arrives before the redirect returns.
@@ -48,14 +64,14 @@ export async function checkoutAction() {
       userId: user.id,
       email: user.email,
       status: "pending",
-      totalCHF,
+      totalUSD,
       items: {
         create: live.map((p) => ({
           productId: p.id,
           brand: p.brand,
           name: p.name,
           size: p.size,
-          priceCHF: p.priceCHF,
+          priceUSD: p.priceUSD,
         })),
       },
     },
@@ -72,8 +88,8 @@ export async function checkoutAction() {
     line_items: live.map((p) => ({
       quantity: 1,
       price_data: {
-        currency: "chf",
-        unit_amount: p.priceCHF * 100, // Stripe takes the smallest unit.
+        currency: "usd",
+        unit_amount: p.priceUSD * 100, // Stripe takes cents.
         product_data: {
           name: `${p.brand} ${p.season} — ${p.name}`,
           description: `Size ${p.size}`,
@@ -92,7 +108,14 @@ export async function checkoutAction() {
     data: { stripeSessionId: session.id },
   });
 
-  if (!session.url) throw new Error("Stripe did not return a checkout URL.");
+  if (!session.url) {
+    return {
+      status: "error",
+      message: "Stripe did not return a checkout URL. Try again.",
+    };
+  }
 
+  // redirect() throws a control-flow signal, so it must sit outside any
+  // try/catch and after every early return.
   redirect(session.url);
 }
