@@ -231,6 +231,47 @@ hr {
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Touch targets
+
+   The house style is 11px caps, which gives links a ~12px box — well under the
+   44px minimum a finger can reliably hit. Rather than enlarge the type and
+   break the art direction, the tappable AREA is padded out on touch devices
+   while the text stays the same size.
+
+   `pointer: coarse` targets touch input specifically, so mouse users keep the
+   tight original spacing.
+   --------------------------------------------------------------------------- */
+
+@media (pointer: coarse) {
+  header a,
+  footer a,
+  [data-touch-target] a,
+  [data-touch-target] button,
+  [data-touch-target] label {
+    display: inline-block;
+    /* 11px type in a 1.2 line-box is ~13px; 15.5px above and below brings the
+       hit area to ~44px without moving the text. */
+    padding-block: 0.97rem;
+  }
+
+  /* Filter links sit in dense rows; give them horizontal room too so adjacent
+     values are not mis-tapped. */
+  [data-touch-target] a {
+    padding-inline: 0.25rem;
+    margin-inline: -0.25rem;
+  }
+
+  /* Auth form secondary links ("Forgot your password?", "Sign Up"). The
+     sign-up switch is a <button> wrapped in an <a>, so the padding has to go
+     on the inner element to grow the actual hit area. */
+  .auth-surface a {
+    display: inline-block;
+    padding-block: 0.8rem;
+  }
+
+}
+
 /* NeonAuthUIProvider wraps the whole app in its own div. That div sat between
    body (a flex column of min-height 100dvh) and the footer, so the flex chain
    broke and the footer floated mid-page on short pages — 823px above the
@@ -443,7 +484,9 @@ body > .neon-auth-ui {
 /* The "Sign Up" / "Sign In" switch is wrapped in <a><button>. A bordered
    button inside a sentence reads as a stray chip; render it as a link. */
 .auth-surface a > button {
-  display: inline;
+  /* inline-block, not inline: an inline box ignores vertical padding, which
+     left this switch at a 19px hit area on a phone. */
+  display: inline-block;
   width: auto;
   border: 0;
   padding: 0;
@@ -457,6 +500,12 @@ body > .neon-auth-ui {
 .auth-surface a > button:hover:not(:disabled) {
   opacity: 1;
   border-bottom-color: var(--color-bone);
+}
+
+@media (pointer: coarse) {
+  .auth-surface a > button {
+    padding-block: 0.8rem;
+  }
 }
 
 /* Footer row holding that switch. */

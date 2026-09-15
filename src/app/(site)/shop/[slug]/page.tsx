@@ -65,8 +65,12 @@ export default async function ProductPage({
       }))
     : false;
 
+  // On a phone the columns stack, and with the images first a buyer had to
+  // scroll past every photograph before seeing the price or the buy button.
+  // flex-col-reverse puts the details first below md; the desktop grid is
+  // untouched.
   return (
-    <article className="md:grid md:grid-cols-[1fr_minmax(20rem,26rem)]">
+    <article className="flex flex-col-reverse md:grid md:grid-cols-[1fr_minmax(20rem,26rem)]">
       <div className="border-hairline md:border-r">
         <h1 className="sr-only">
           {product.brand} {product.season} — {product.name}

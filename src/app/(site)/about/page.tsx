@@ -92,7 +92,7 @@ export default function AboutPage() {
         </p>
       </Section>
 
-      <section className="px-5 py-10 md:px-8 md:py-14">
+      <section data-touch-target className="px-5 py-10 md:px-8 md:py-14">
         <a
           href={instagramUrl}
           target="_blank"

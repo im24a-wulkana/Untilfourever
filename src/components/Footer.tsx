@@ -13,7 +13,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative z-10 mt-auto border-t border-hairline bg-black">
+    <footer data-touch-target className="relative z-10 mt-auto border-t border-hairline bg-black">
       <div className="flex flex-col gap-4 px-5 py-6 text-label uppercase tracking-caps md:flex-row md:items-baseline md:justify-between md:px-8">
         <a
           href={instagramUrl}

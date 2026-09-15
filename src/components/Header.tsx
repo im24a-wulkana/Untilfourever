@@ -12,7 +12,7 @@ export async function Header() {
   const cartCount = user ? await getCartCount() : 0;
 
   return (
-    <header className="relative z-10 border-b border-hairline bg-black">
+    <header data-touch-target className="relative z-10 border-b border-hairline bg-black">
       {/* Four caps items at 0.12em tracking do not fit beside the wordmark on a
           narrow phone. The nav wraps to its own row rather than shrinking the
           type or hiding links behind a menu. */}

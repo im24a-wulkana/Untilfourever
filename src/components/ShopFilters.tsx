@@ -97,18 +97,47 @@ export function ShopFilters({
   // With an empty catalogue there is nothing to filter by.
   if (brands.length === 0) return null;
 
+  const active = [current.brand, current.size, current.category, current.sold]
+    .filter(Boolean).length;
+
   return (
     <section aria-label="Filter the archive" className="border-b border-hairline">
-      <div className="divide-y divide-hairline px-5 md:px-8">
-        <FilterRow label="Brand" options={brands} paramKey="brand" current={current} />
-        <FilterRow label="Size" options={sizes} paramKey="size" current={current} />
-        <FilterRow label="Type" options={categories} paramKey="category" current={current} />
-        <FilterRow
-          label="Status"
-          options={["available", "sold"]}
-          paramKey="sold"
-          current={current}
-          allLabel="All"
+      {/* On a phone four filter rows filled the entire first screen, so the
+          shop opened on filters rather than on clothes. The rows collapse
+          behind one line below md, and are always shown above it.
+
+          This is a checkbox rather than <details> because a stray rule was
+          overriding the browser's default hiding of closed details content,
+          and `peer-checked` is unambiguous about what is visible. */}
+      <input
+        type="checkbox"
+        id="filters-open"
+        className="peer sr-only"
+        aria-hidden
+        tabIndex={-1}
+      />
+      <label
+        htmlFor="filters-open"
+        data-touch-target
+        className="flex cursor-pointer items-baseline justify-between px-5 py-4 text-label uppercase tracking-caps text-meta md:hidden"
+      >
+        <span>Filter{active > 0 ? ` (${active})` : ""}</span>
+        <span aria-hidden className="text-bone peer-checked:hidden">+</span>
+      </label>
+
+      <div
+        data-touch-target
+        className="hidden divide-y divide-hairline border-t border-hairline px-5 peer-checked:block md:block md:border-t-0 md:px-8"
+      >
+          <FilterRow label="Brand" options={brands} paramKey="brand" current={current} />
+          <FilterRow label="Size" options={sizes} paramKey="size" current={current} />
+          <FilterRow label="Type" options={categories} paramKey="category" current={current} />
+          <FilterRow
+            label="Status"
+            options={["available", "sold"]}
+            paramKey="sold"
+            current={current}
+            allLabel="All"
         />
       </div>
     </section>

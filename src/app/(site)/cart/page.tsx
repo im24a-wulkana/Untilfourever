@@ -29,7 +29,7 @@ export default async function CartPage() {
         <p className="mt-8">
           <Link
             href="/auth/sign-in?next=/cart"
-            className="inline-block border border-bone px-6 py-3 text-label uppercase tracking-caps text-bone transition-opacity duration-150 hover:opacity-60"
+            className="inline-block border border-bone px-6 py-4 text-label uppercase tracking-caps text-bone transition-opacity duration-150 hover:opacity-60"
           >
             Sign in
           </Link>
@@ -135,7 +135,7 @@ export default async function CartPage() {
             <form action={checkoutAction} className="mt-8">
               <button
                 type="submit"
-                className="inline-block border border-bone px-6 py-3 text-label uppercase tracking-caps text-bone transition-opacity duration-150 hover:opacity-60"
+                className="inline-block border border-bone px-6 py-4 text-label uppercase tracking-caps text-bone transition-opacity duration-150 hover:opacity-60"
               >
                 Checkout
               </button>
