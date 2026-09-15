@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getUser, isAdminEmail } from "@/lib/auth";
+import { getUser, isAdminEmail, hasAdminRole } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatPrice } from "@/components/Price";
 
@@ -22,7 +22,8 @@ export default async function AccountPage() {
     orderBy: { createdAt: "desc" },
   });
 
-  const admin = isAdminEmail(user.email);
+  // Same rule as getAdmin(): the email allowlist or a Neon Auth admin role.
+  const admin = isAdminEmail(user.email) || hasAdminRole(user.role);
 
   return (
     <div className="px-5 py-10 md:px-8 md:py-14">

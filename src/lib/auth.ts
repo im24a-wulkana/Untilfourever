@@ -36,12 +36,20 @@ export const auth = new Proxy({} as NeonAuth, {
 });
 
 /**
- * Admin is decided here, in code, not by a database column.
+ * Admin is granted two ways, and both are checked.
  *
- * A role stored in a row can be changed by anything with write access to the
- * database — an SQL injection, a leaked connection string, a bug in an admin
- * form. Keeping the list in source means escalating to admin requires a commit
- * and a deploy, which is a much harder thing to do by accident or attack.
+ * 1. An email in ADMIN_EMAILS below. This is the root account: changing it
+ *    needs a commit and a deploy, so it cannot be granted by anything with
+ *    database access alone, and it is the way back in if a role is ever
+ *    cleared by mistake.
+ *
+ * 2. role = "admin" on the Neon Auth user. This is the convenient way to add
+ *    someone: set it in the Neon console, no deploy needed.
+ *
+ * The tradeoff of (2) is worth stating plainly: anything that can write to the
+ * neon_auth.user table can grant itself admin. That is an acceptable risk here
+ * because the same database access could edit listings directly anyway — but
+ * it does mean a leaked DATABASE_URL is now also a path to the admin UI.
  */
 const ADMIN_EMAILS = ["aaron.wulkan@icloud.com"] as const;
 
@@ -52,11 +60,18 @@ export function isAdminEmail(email: string | null | undefined): boolean {
   );
 }
 
+/** True when the Neon Auth session carries role = "admin". */
+export function hasAdminRole(role: string | null | undefined): boolean {
+  return role?.trim().toLowerCase() === "admin";
+}
+
 export interface SessionUser {
   id: string;
   email: string;
   name?: string;
   image?: string;
+  /** From Neon Auth. "admin" grants access to /admin. */
+  role?: string | null;
 }
 
 /**
@@ -79,7 +94,8 @@ export async function getUser(): Promise<SessionUser | null> {
 /** The signed-in user if they are an admin, otherwise null. */
 export async function getAdmin(): Promise<SessionUser | null> {
   const user = await getUser();
-  return user && isAdminEmail(user.email) ? user : null;
+  if (!user) return null;
+  return isAdminEmail(user.email) || hasAdminRole(user.role) ? user : null;
 }
 
 /**
