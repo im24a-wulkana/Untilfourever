@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { Category, Condition } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth";
 import { slugify } from "@/lib/products";
+import { uploadProductImages } from "@/lib/upload";
 import { extractFromCaption } from "@/lib/extract";
 
 import type { ParseState, SaveState } from "./types";
@@ -106,6 +107,18 @@ export async function saveProduct(
       slug = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
     }
 
+    // Photographs, in the order chosen — images[0] is the cover shot.
+    const files = formData
+      .getAll("images")
+      .filter((entry): entry is File => entry instanceof File && entry.size > 0);
+
+    const { urls, errors } = await uploadProductImages(files, slug);
+
+    // A failed upload must not silently produce a listing with no pictures.
+    if (errors.length > 0 && urls.length === 0) {
+      return { status: "error", message: errors.join(" ") };
+    }
+
     const product = await db.product.create({
       data: {
         slug,
@@ -120,13 +133,21 @@ export async function saveProduct(
         conditionNotes: optional(formData.get("conditionNotes")),
         sourceCaption: optional(formData.get("sourceCaption")),
         measurements,
-        images: [],
+        images: urls,
         status: "draft",
       },
     });
 
     revalidatePath("/admin");
-    return { status: "saved", id: product.id };
+    revalidatePath("/shop");
+
+    return {
+      status: "saved",
+      id: product.id,
+      imageCount: urls.length,
+      // Partial failures are surfaced rather than swallowed.
+      warning: errors.length > 0 ? errors.join(" ") : undefined,
+    };
   } catch (error) {
     return {
       status: "error",

@@ -13,4 +13,10 @@ export type ParseState =
 export type SaveState =
   | { status: "idle" }
   | { status: "error"; message: string }
-  | { status: "saved"; id: string };
+  | {
+      status: "saved";
+      id: string;
+      imageCount: number;
+      /** Set when some photographs uploaded and others failed. */
+      warning?: string;
+    };
