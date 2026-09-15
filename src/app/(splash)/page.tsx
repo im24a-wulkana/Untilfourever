@@ -10,13 +10,18 @@ import { site } from "@/data/site";
 export default function HomePage() {
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-black">
+      {/* A portrait photograph on a wide screen gets cropped hard by
+          object-cover. Anchoring to the top sounded right but put the head at
+          the centre of the frame and pushed the garment off the bottom — so
+          the crop stays centred, where the clothes are. */}
       <Image
         src={openingShot.src}
         alt={openingShot.alt}
         placeholder="blur"
         priority
+        quality={90}
         sizes="100vw"
-        className="h-full w-full object-cover"
+        className="h-full w-full object-cover object-center"
       />
 
       {/* Scrim. The image is the ground for the type, so it sits well back.
