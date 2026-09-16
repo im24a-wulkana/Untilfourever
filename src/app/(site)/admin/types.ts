@@ -16,6 +16,8 @@ export type SaveState =
   | {
       status: "saved";
       id: string;
+      /** True when it went straight to the shop rather than saving a draft. */
+      published: boolean;
       imageCount: number;
       /** Set when some photographs uploaded and others failed. */
       warning?: string;

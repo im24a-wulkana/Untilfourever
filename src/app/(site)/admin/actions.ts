@@ -67,6 +67,11 @@ export async function saveProduct(
   const name = optional(formData.get("name"));
   const priceRaw = optional(formData.get("priceUSD"));
 
+  // "publish" puts it in the shop immediately; anything else saves a draft.
+  // Draft stays the default so an accidental submit cannot expose a
+  // half-finished listing, and an Instagram import is never auto-published.
+  const publish = String(formData.get("intent") ?? "") === "publish";
+
   if (!brand || !name || !priceRaw) {
     return {
       status: "error",
@@ -134,7 +139,7 @@ export async function saveProduct(
         sourceCaption: optional(formData.get("sourceCaption")),
         measurements,
         images: urls,
-        status: "draft",
+        status: publish ? "live" : "draft",
       },
     });
 
@@ -144,6 +149,7 @@ export async function saveProduct(
     return {
       status: "saved",
       id: product.id,
+      published: publish,
       imageCount: urls.length,
       // Partial failures are surfaced rather than swallowed.
       warning: errors.length > 0 ? errors.join(" ") : undefined,

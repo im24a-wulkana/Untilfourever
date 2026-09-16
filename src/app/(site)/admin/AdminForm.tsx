@@ -275,9 +275,31 @@ export function AdminForm() {
           </div>
         </fieldset>
 
-        <button type="submit" disabled={saving} className={button}>
-          {saving ? "Saving…" : "Save as draft"}
-        </button>
+        {/* Two submits on one form. The value of the button pressed is what
+            is sent as `intent`, so publishing needs no extra state. Draft is
+            listed first and styled quietly: publishing is the irreversible
+            one, in that it puts the piece in front of customers. */}
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="submit"
+            name="intent"
+            value="draft"
+            disabled={saving}
+            className="border border-hairline px-6 py-3 text-label uppercase tracking-caps text-meta transition-opacity duration-150 hover:opacity-60 disabled:opacity-40"
+          >
+            {saving ? "Saving…" : "Save as draft"}
+          </button>
+
+          <button
+            type="submit"
+            name="intent"
+            value="publish"
+            disabled={saving}
+            className={button}
+          >
+            {saving ? "Saving…" : "Publish to shop"}
+          </button>
+        </div>
 
         {saveState.status === "error" ? (
           <p className="border border-hairline px-4 py-3 text-body text-bone">
@@ -288,11 +310,15 @@ export function AdminForm() {
         {saveState.status === "saved" ? (
           <div className="space-y-1">
             <p className="text-body text-meta">
-              Saved as draft with{" "}
+              {saveState.published ? "Published to the shop" : "Saved as draft"}{" "}
+              with{" "}
               {saveState.imageCount === 0
                 ? "no photographs"
                 : `${saveState.imageCount} photograph${saveState.imageCount === 1 ? "" : "s"}`}
-              . Publish it below to put it in the shop.
+              .{" "}
+              {saveState.published
+                ? "It is live now — unpublish it below if that was not intended."
+                : "It is not visible in the shop yet; publish it below when ready."}
             </p>
             {saveState.warning ? (
               <p className="text-body text-bone">{saveState.warning}</p>

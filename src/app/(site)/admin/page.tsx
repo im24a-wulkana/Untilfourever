@@ -31,8 +31,8 @@ export default async function AdminPage() {
           Admin — add a piece
         </h1>
         <p className="mt-4 max-w-[62ch] text-body text-meta">
-          Paste a caption, parse it, correct anything wrong, then save. Nothing
-          is published automatically: every piece is saved as a draft.
+          Fill in the piece and publish it, or save it as a draft to finish
+          later. Drafts are invisible in the shop until you publish them.
         </p>
       </header>
 
@@ -40,8 +40,11 @@ export default async function AdminPage() {
 
       <section className="mt-14 border-t border-hairline pt-8">
         <h2 className="text-label uppercase tracking-caps text-meta">
-          Recent ({recent.length})
+          All listings ({recent.length})
         </h2>
+        <p className="mt-2 text-body text-meta">
+          Only live pieces appear in the shop. Drafts are visible to you alone.
+        </p>
 
         {recent.length === 0 ? (
           <p className="mt-4 text-body text-meta">Nothing saved yet.</p>
@@ -52,8 +55,12 @@ export default async function AdminPage() {
                 key={p.id}
                 className="flex flex-wrap items-baseline gap-x-5 gap-y-1 py-2"
               >
-                <span className="text-label uppercase tracking-caps text-meta">
-                  {p.status}
+                <span
+                  className={`text-label uppercase tracking-caps ${
+                    p.status === "live" ? "text-bone" : "text-meta"
+                  }`}
+                >
+                  {p.status === "live" ? "● live" : p.status}
                 </span>
                 <span className="text-label uppercase tracking-caps text-meta">
                   {p.brand}
