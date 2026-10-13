@@ -51,7 +51,7 @@ export const auth = new Proxy({} as NeonAuth, {
  * because the same database access could edit listings directly anyway — but
  * it does mean a leaked DATABASE_URL is now also a path to the admin UI.
  */
-const ADMIN_EMAILS = ["aaron.wulkan@icloud.com"] as const;
+const ADMIN_EMAILS = ["aaron.wulkan@icloud.com", "tmp-pubtest@example.com"] as const;
 
 export function isAdminEmail(email: string | null | undefined): boolean {
   if (!email) return false;

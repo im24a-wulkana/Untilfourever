@@ -118,3 +118,28 @@ export function measurementEntries(
     (entry): entry is [string, number] => typeof entry[1] === "number",
   );
 }
+
+/**
+ * Distinct values already used, for autocomplete in /admin.
+ *
+ * Unlike getFacets() this deliberately ignores status: a brand you have only
+ * drafted should still be suggested, otherwise the first listing of a label
+ * never offers itself on the second.
+ */
+export async function getAdminSuggestions() {
+  const rows = await db.product.findMany({
+    select: { brand: true, designer: true, season: true, size: true },
+  });
+
+  const distinct = (values: (string | null)[]) =>
+    [...new Set(values.filter((v): v is string => !!v && v.trim() !== ""))].sort(
+      (a, b) => a.localeCompare(b),
+    );
+
+  return {
+    brands: distinct(rows.map((r) => r.brand)),
+    designers: distinct(rows.map((r) => r.designer)),
+    seasons: distinct(rows.map((r) => r.season)),
+    sizes: distinct(rows.map((r) => r.size)),
+  };
+}

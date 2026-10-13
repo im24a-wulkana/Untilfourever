@@ -24,17 +24,27 @@ const MEASUREMENT_KEYS = [
   "insole",
 ] as const;
 
+/**
+ * A text field, optionally backed by a <datalist> of values already used in
+ * the catalogue. Typing a letter filters the list, and the browser handles the
+ * dropdown — no JavaScript, and unlike a <select> you can still type a value
+ * that has never been used before, which matters for a one-off archive piece.
+ */
 function Field({
   name,
   label: text,
   defaultValue,
   required,
+  suggestions,
 }: {
   name: string;
   label: string;
   defaultValue?: string | null;
   required?: boolean;
+  suggestions?: string[];
 }) {
+  const listId = suggestions?.length ? `${name}-options` : undefined;
+
   return (
     <p className="space-y-1">
       <label className={label} htmlFor={name}>
@@ -46,13 +56,29 @@ function Field({
         name={name}
         defaultValue={defaultValue ?? ""}
         required={required}
+        list={listId}
+        autoComplete="off"
         className={field}
       />
+      {listId ? (
+        <datalist id={listId}>
+          {suggestions!.map((value) => (
+            <option key={value} value={value} />
+          ))}
+        </datalist>
+      ) : null}
     </p>
   );
 }
 
-export function AdminForm() {
+export interface AdminSuggestions {
+  brands: string[];
+  designers: string[];
+  seasons: string[];
+  sizes: string[];
+}
+
+export function AdminForm({ suggestions }: { suggestions: AdminSuggestions }) {
   const [parseState, parseAction, parsing] = useActionState<
     ParseState,
     FormData
@@ -152,11 +178,32 @@ export function AdminForm() {
         />
 
         <div className="grid gap-4 md:grid-cols-2">
-          <Field name="brand" label="Brand" defaultValue={parsed?.brand} required />
-          <Field name="designer" label="Designer" defaultValue={parsed?.designer} />
-          <Field name="season" label="Season" defaultValue={parsed?.season} />
+          <Field
+            name="brand"
+            label="Brand"
+            defaultValue={parsed?.brand}
+            suggestions={suggestions.brands}
+            required
+          />
+          <Field
+            name="designer"
+            label="Designer"
+            defaultValue={parsed?.designer}
+            suggestions={suggestions.designers}
+          />
+          <Field
+            name="season"
+            label="Season"
+            defaultValue={parsed?.season}
+            suggestions={suggestions.seasons}
+          />
           <Field name="name" label="Name" defaultValue={parsed?.name} required />
-          <Field name="size" label="Size" defaultValue={parsed?.size} />
+          <Field
+            name="size"
+            label="Size"
+            defaultValue={parsed?.size}
+            suggestions={suggestions.sizes}
+          />
 
           <p className="space-y-1">
             <label className={label} htmlFor="category">

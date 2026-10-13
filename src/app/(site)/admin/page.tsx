@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getAdmin } from "@/lib/auth";
+import { getAdminSuggestions } from "@/lib/products";
 import { AdminForm } from "./AdminForm";
 import { setStatusAction, deleteProductAction } from "./actions";
 
@@ -18,6 +19,8 @@ export default async function AdminPage() {
   // that /admin exists. Non-admins should not learn that.
   const admin = await getAdmin();
   if (!admin) notFound();
+
+  const suggestions = await getAdminSuggestions();
 
   const recent = await db.product.findMany({
     orderBy: { createdAt: "desc" },
@@ -36,7 +39,7 @@ export default async function AdminPage() {
         </p>
       </header>
 
-      <AdminForm />
+      <AdminForm suggestions={suggestions} />
 
       <section className="mt-14 border-t border-hairline pt-8">
         <h2 className="text-label uppercase tracking-caps text-meta">
